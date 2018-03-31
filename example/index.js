@@ -1,0 +1,1 @@
+let wiKoa = require('../src/application')
