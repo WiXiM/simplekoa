@@ -20,7 +20,7 @@ class Application {
      * @param { Function } fn 回掉函数处理函数
      */
     use(fn) {
-        this.callback = fn
+        this.callbackFunc = fn
     }
 
     /**
