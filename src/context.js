@@ -1,7 +1,7 @@
 module.exports = {
 
     get query() {
-        return this.resquest.quert
+        return this.resquest.query
     },
 
     get body() {
@@ -19,5 +19,5 @@ module.exports = {
     set status(statusCode) {
         this.response.status = statusCode
     }
-    
+
 }

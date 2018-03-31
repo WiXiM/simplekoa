@@ -2,9 +2,8 @@ let wiKoa = require('../src/application')
 
 let app = new wiKoa()
 
-app.use((req, res) => {
-    res.writeHead(200)
-    res.end('Hi~ WiX')
+app.use(async ctx => {
+    ctx.body = 'Hello' + ctx.query.name
 })
 
 app.listen(3000, () => {

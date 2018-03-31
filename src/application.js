@@ -55,7 +55,7 @@ class Application {
         ctx.request = Object.create(this.request)
         ctx.response = Object.create(this.response)
 
-        ctx.req = ctx.request.req
+        ctx.req = ctx.request.req = req
         ctx.res = ctx.response.res = res
 
         return ctx
