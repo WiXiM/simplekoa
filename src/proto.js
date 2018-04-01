@@ -3,7 +3,7 @@
 let proto = {}
 
 // 为proto名为protoerty的属性设置setter
-function delegateSet(params) {
+function delegateSet(property, name) {
     proto.__defineSetter__(name, function (val) {
         this[property][name] = val
     })
