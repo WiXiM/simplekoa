@@ -9,6 +9,7 @@ class Application {
      * 构造函数
      */
     constructor() {
+        this.middlewares = []
         this.callbackFunc
         this.context = context
         this.request = request
@@ -27,8 +28,43 @@ class Application {
      * 挂载回掉函数
      * @param { Function } fn 回掉函数处理函数
      */
-    use(fn) {
-        this.callbackFunc = fn
+    // use(fn) {
+    //     this.callbackFunc = fn
+    // }
+    /**
+ * 中间件挂载
+ * @param { Function } middleware 中间件函数
+ */
+    use(middleware) {
+        this.middlewares.push(middleware)
+    }
+
+    /**
+     * 中间件合并方法， 将中间件数组合并为一个中间件
+     * @return { Function }
+     */
+    compose() {
+        //将middlewares 合并为一个函数， 该函数接受一个ctx 对象
+        return async ctx => {
+
+            function createNext(middleware, lastNext) {
+                return async () => {
+                    await middleware(ctx, lastNext)
+                }
+            }
+
+            let len = this.middlewares.length
+            let next = async () => {
+                return Promise.resolve()
+            }
+
+            for (let i = len - 1; i >= 0; i--) {
+                let currentMiddleware = this.middlewares[i]
+                next = createNext(currentMiddleware, next)
+            }
+
+            await next()
+        }
     }
 
     /**
@@ -39,8 +75,10 @@ class Application {
         return (req, res) => {
             let ctx = this.createContext(req, res)
             let respond = () => this.responseBody(ctx)
-            this.callbackFunc(ctx)
-                .then(respond)
+            let fn = this.compose()
+
+            return fn(ctx).then(respond)
+            // this.callbackFunc(ctx).then(respond)
         }
     }
 
@@ -75,6 +113,7 @@ class Application {
             ctx.res.end(JSON.stringify(content))
         }
     }
+
 }
 
 module.exports = Application
