@@ -1,14 +1,18 @@
+let EventEmitter = require('events')
+
 let http = require('http')
 let context = require('./proto')
 // let context = require('./context')
 let request = require('./request')
 let response = require('./response')
 
-class Application {
+class Application extends EventEmitter {
     /**
      * 构造函数
      */
     constructor() {
+        super()
+
         this.middlewares = []
         this.callbackFunc
         this.context = context
@@ -75,9 +79,14 @@ class Application {
         return (req, res) => {
             let ctx = this.createContext(req, res)
             let respond = () => this.responseBody(ctx)
+
+            let onerror = (err) => this.onerror(err, ctx)
+
             let fn = this.compose()
 
-            return fn(ctx).then(respond)
+            return fn(ctx)
+                .then(respond)
+                .catch(onerror) // 在这里catch异常，调用onerror方法处理异常
             // this.callbackFunc(ctx).then(respond)
         }
     }
@@ -112,6 +121,23 @@ class Application {
         else if (typeof content === 'object') {
             ctx.res.end(JSON.stringify(content))
         }
+    }
+
+    /**
+     * 错误处理
+     * @param {Object} err Error对象
+     * @param {Object} ctx ctx实例
+     */
+    onerror(err, ctx) {
+        if (err.code === 'ENONET') {
+            ctx.status = 404
+        }
+        else {
+            ctx.status = 400
+        }
+        let msg = err.message || 'Internal error'
+        // 触发 error 事件
+        this.emit('error', err)
     }
 
 }
